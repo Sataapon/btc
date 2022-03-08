@@ -38,7 +38,6 @@ INSERT INTO txn (
 	if err != nil {
 		return err
 	}
-
 	return nil
 }
 
@@ -64,7 +63,6 @@ LIMIT 1;
 		}
 		return nil, false, err
 	}
-
 	accAmount, err := amt.New(accAmountStr)
 	if err != nil {
 		return nil, false, err
@@ -94,7 +92,6 @@ WHERE
 	if err != nil {
 		return nil, err
 	}
-
 	rows, err := w.db.Query(sqlScript, startDatetime.String(), endDatetime.String())
 	if err != nil {
 		return nil, err
@@ -116,12 +113,10 @@ WHERE
 		if err != nil {
 			break
 		}
-
 		accAmount, err := amt.New(accAmountStr)
 		if err != nil {
 			break
 		}
-
 		datetime, err := ttime.New(datetimeStr)
 		if err != nil {
 			break
@@ -140,15 +135,12 @@ WHERE
 		}
 		found = true
 	}
-
 	if closeErr := rows.Close(); closeErr != nil {
 		return nil, err
 	}
-
 	if err != nil {
 		return nil, err
 	}
-
 	err = rows.Err()
 	if err != nil {
 		return nil, err
@@ -168,11 +160,9 @@ WHERE
 	if err != nil {
 		return nil, err
 	}
-
 	for idx := 0; idx < lastIdx; idx++ {
 		records[idx].AccAmount = record.AccAmount
 	}
-
 	return records, nil
 }
 
@@ -194,7 +184,6 @@ WHERE
 	if err != nil {
 		return nil, err
 	}
-
 	accAmount, err := amt.New(accAmountStr)
 	if err != nil {
 		return nil, err
