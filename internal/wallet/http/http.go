@@ -47,32 +47,20 @@ func (s *httpServer) SaveRecord(w http.ResponseWriter, r *http.Request) {
 	req := &InsertRequest{}
 	err := json.NewDecoder(r.Body).Decode(req)
 	if err != nil {
-		if metaErr, ok := meta.IsError(err); ok {
-			http.Error(w, metaErr.Error(), metaErr.HTTPStatus())
-			return
-		}
-		http.Error(w, err.Error(), http.StatusInternalServerError)
+		handleErr(w, err)
 		return
 	}
 
 	err = s.walletUsecase.SaveRecord(req.Record.Datetime, req.Record.Amount)
 	if err != nil {
-		if metaErr, ok := meta.IsError(err); ok {
-			http.Error(w, metaErr.Error(), metaErr.HTTPStatus())
-			return
-		}
-		http.Error(w, err.Error(), http.StatusInternalServerError)
+		handleErr(w, err)
 		return
 	}
 
 	res := &InsertResponse{Success: true}
 	err = json.NewEncoder(w).Encode(res)
 	if err != nil {
-		if metaErr, ok := meta.IsError(err); ok {
-			http.Error(w, metaErr.Error(), metaErr.HTTPStatus())
-			return
-		}
-		http.Error(w, err.Error(), http.StatusInternalServerError)
+		handleErr(w, err)
 		return
 	}
 }
@@ -81,32 +69,28 @@ func (s *httpServer) GetHistory(w http.ResponseWriter, r *http.Request) {
 	req := &GetHistoryRequest{}
 	err := json.NewDecoder(r.Body).Decode(req)
 	if err != nil {
-		if metaErr, ok := meta.IsError(err); ok {
-			http.Error(w, metaErr.Error(), metaErr.HTTPStatus())
-			return
-		}
-		http.Error(w, err.Error(), http.StatusInternalServerError)
+		handleErr(w, err)
 		return
 	}
 
 	records, err := s.walletUsecase.GetHistory(req.StartDatetime, req.StopDatetime)
 	if err != nil {
-		if metaErr, ok := meta.IsError(err); ok {
-			http.Error(w, metaErr.Error(), metaErr.HTTPStatus())
-			return
-		}
-		http.Error(w, err.Error(), http.StatusInternalServerError)
+		handleErr(w, err)
 		return
 	}
 
 	res := &GetHistoryResponse{Records: convertRecords(records)}
 	err = json.NewEncoder(w).Encode(res)
 	if err != nil {
-		if metaErr, ok := meta.IsError(err); ok {
-			http.Error(w, metaErr.Error(), metaErr.HTTPStatus())
-			return
-		}
-		http.Error(w, err.Error(), http.StatusInternalServerError)
+		handleErr(w, err)
 		return
 	}
+}
+
+func handleErr(w http.ResponseWriter, err error) {
+	if metaErr, ok := meta.IsError(err); ok {
+		http.Error(w, metaErr.Error(), metaErr.HTTPStatus())
+		return
+	}
+	http.Error(w, err.Error(), http.StatusInternalServerError)
 }
