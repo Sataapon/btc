@@ -31,21 +31,25 @@ func New(amtStr string) (Amount, error) {
 }
 
 func (a Amount) Plus(oa Amount) Amount {
-	if len(oa.fracPart) > len(a.fracPart) {
-		a.fracPart, oa.fracPart = oa.fracPart, a.fracPart
+	aFracPart := make([]byte, len(a.fracPart))
+	oaFracPart := make([]byte, len(oa.fracPart))
+	copy(aFracPart, a.fracPart)
+	copy(oaFracPart, oa.fracPart)
+	if len(oaFracPart) > len(aFracPart) {
+		aFracPart, oaFracPart = oaFracPart, aFracPart
 	}
 
-	diff := len(a.fracPart) - len(oa.fracPart)
+	diff := len(aFracPart) - len(oaFracPart)
 	carry := 0
-	for idx := diff; idx < len(a.fracPart); idx++ {
-		sum := int(a.fracPart[idx]+oa.fracPart[idx-diff]) - 2*offset + carry
-		a.fracPart[idx] = byte(sum%10 + offset)
+	for idx := diff; idx < len(aFracPart); idx++ {
+		sum := int(aFracPart[idx]+oaFracPart[idx-diff]) - 2*offset + carry
+		aFracPart[idx] = byte(sum%10 + offset)
 		carry = sum / 10
 	}
 
 	return Amount{
 		intPart:  a.intPart + oa.intPart + carry,
-		fracPart: bytes.TrimLeft(a.fracPart, "0"),
+		fracPart: bytes.TrimLeft(aFracPart, "0"),
 	}
 }
 
@@ -58,14 +62,15 @@ func (a Amount) IsNegative() bool {
 }
 
 func (a Amount) String() string {
-	if len(a.fracPart) == 0 {
+	n := len(a.fracPart)
+	if n == 0 {
 		return fmt.Sprintf("%d", a.intPart)
 	}
-	n := len(a.fracPart)
-	for idx := 0; idx < n/2; idx++ {
-		a.fracPart[idx], a.fracPart[n-1-idx] = a.fracPart[n-1-idx], a.fracPart[idx]
+	fracPart := make([]byte, n)
+	for idx := 0; idx < n; idx++ {
+		fracPart[idx] = a.fracPart[n-1-idx]
 	}
-	return fmt.Sprintf("%d.%s", a.intPart, a.fracPart)
+	return fmt.Sprintf("%d.%s", a.intPart, fracPart)
 }
 
 func (a Amount) ToFloat() (float64, error) {
