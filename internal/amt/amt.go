@@ -41,7 +41,6 @@ func (a Amount) Plus(oa Amount) Amount {
 		sum := int(a.fracPart[idx]+oa.fracPart[idx-diff]) - 2*offset + carry
 		a.fracPart[idx] = byte(sum%10 + offset)
 		carry = sum / 10
-		idx++
 	}
 
 	return Amount{
