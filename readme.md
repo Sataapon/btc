@@ -12,5 +12,5 @@ make server
 
 . ./script/save_record.sh
 
-. ./scripts/gen_history.sh
+. ./scripts/get_history.sh
 ```
