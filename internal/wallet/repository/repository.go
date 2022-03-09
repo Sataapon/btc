@@ -96,13 +96,50 @@ WHERE
 	if err != nil {
 		return nil, err
 	}
+	defer rows.Close()
 
 	var (
-		found   = false
-		firstID int
-		idx     = 0
-		lastIdx int
+		found = false
+		idx   = 0
 	)
+	if rows.Next() {
+		var (
+			id           int
+			accAmountStr string
+			datetimeStr  string
+		)
+		err = rows.Scan(&id, &accAmountStr, &datetimeStr)
+		if err != nil {
+			return nil, err
+		}
+		accAmount, err := amt.New(accAmountStr)
+		if err != nil {
+			return nil, err
+		}
+		datetime, err := ttime.New(datetimeStr)
+		if err != nil {
+			return nil, err
+		}
+
+		for ; idx < len(records) && records[idx].Datetime.Before(datetime); idx++ {
+		}
+		if idx != 0 && id != 1 {
+			record, err := w.getByID(id - 1)
+			if err != nil {
+				return nil, err
+			}
+			for i := 0; i < idx; i++ {
+				records[i].AccAmount = record.AccAmount
+			}
+		}
+
+		for ; idx < len(records) && !records[idx].Datetime.After(datetime); idx++ {
+			records[idx].AccAmount = accAmount
+		}
+
+		found = true
+	}
+
 	for rows.Next() {
 		var (
 			id           int
@@ -111,57 +148,28 @@ WHERE
 		)
 		err = rows.Scan(&id, &accAmountStr, &datetimeStr)
 		if err != nil {
-			break
+			return nil, err
 		}
 		accAmount, err := amt.New(accAmountStr)
 		if err != nil {
-			break
+			return nil, err
 		}
 		datetime, err := ttime.New(datetimeStr)
 		if err != nil {
-			break
+			return nil, err
 		}
-
 		for ; idx < len(records) && !records[idx].Datetime.After(datetime); idx++ {
-			if !found {
-				continue
-			}
 			records[idx].AccAmount = accAmount
 		}
-
-		if !found {
-			firstID = id
-			lastIdx = idx
-		}
-		found = true
 	}
-	if closeErr := rows.Close(); closeErr != nil {
-		return nil, err
-	}
-	if err != nil {
-		return nil, err
-	}
-	err = rows.Err()
-	if err != nil {
-		return nil, err
-	}
-
 	if found {
 		for ; idx < len(records); idx++ {
 			records[idx].AccAmount = records[idx-1].AccAmount
 		}
 	}
-
-	if !found || firstID == 1 {
-		return records, nil
-	}
-
-	record, err := w.getByID(firstID - 1)
+	err = rows.Err()
 	if err != nil {
 		return nil, err
-	}
-	for idx := 0; idx < lastIdx; idx++ {
-		records[idx].AccAmount = record.AccAmount
 	}
 	return records, nil
 }
