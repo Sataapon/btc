@@ -11,5 +11,6 @@ make migrate
 make server
 
 . ./script/save_record.sh
+
 . ./scripts/gen_history.sh
 ```
