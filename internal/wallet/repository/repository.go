@@ -16,10 +16,10 @@ type Wallet struct {
 }
 
 func New() *Wallet {
-	return new(config.GetDB())
+	return newWallet(config.GetDB())
 }
 
-func new(db sql.DB) *Wallet {
+func newWallet(db sql.DB) *Wallet {
 	return &Wallet{
 		db: db,
 	}

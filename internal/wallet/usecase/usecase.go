@@ -24,10 +24,10 @@ type Wallet struct {
 }
 
 func New() *Wallet {
-	return new(repository.New())
+	return newWallet(repository.New())
 }
 
-func new(walletRepository walletRepository) *Wallet {
+func newWallet(walletRepository walletRepository) *Wallet {
 	return &Wallet{
 		walletRepository: walletRepository,
 	}
