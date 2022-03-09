@@ -9,6 +9,8 @@ import (
 )
 
 func main() {
+	_ = config.GetDB()
+
 	srv := wlhttp.NewServer(fmt.Sprintf("%s:%s", config.GetHostName(), config.GetServicePort()))
 	fmt.Println("start service...")
 
