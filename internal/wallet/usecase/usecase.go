@@ -46,7 +46,7 @@ func (w *Wallet) SaveRecord(datetime time.Time, amount amt.Amount) error {
 	accAmount := amount
 	if found {
 		if !datetime.After(lastRecord.Datetime) {
-			return meta.NewError(http.StatusPreconditionFailed, err)
+			return meta.NewError(http.StatusPreconditionFailed, errors.New("date time must greater than last date time"))
 		}
 		accAmount = lastRecord.AccAmount.Plus(amount)
 	}
